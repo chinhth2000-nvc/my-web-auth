@@ -6,6 +6,7 @@ import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/fireb
 const firebaseConfig = {
   apiKey: "AIzaSyC96IZTPJ9CO-mWWFkR3NVzWjIaUDBMoRE",
   authDomain: "my-web-auth-2026.firebaseapp.com",
+  databaseURL: "https://my-web-auth-2026-default-rtdb.asia-southeast1.firebasedatabase.app", // LINK 
   projectId: "my-web-auth-2026",
   storageBucket: "my-web-auth-2026.firebasestorage.app",
   messagingSenderId: "358827662331",
