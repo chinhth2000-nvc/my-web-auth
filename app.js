@@ -1,13 +1,13 @@
-// app.js - Bản hoàn chỉnh cuối cùng đã được cấu hình Realtime Database
+// app.js - Bản hoàn chỉnh: Lưu lịch sử đăng nhập & Định dạng ngày tháng tiếng Việt
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, set, get, child, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// 1. Cấu hình Firebase - Đã thêm databaseURL của bạn
+// 1. Cấu hình Firebase của bạn
 const firebaseConfig = {
   apiKey: "AIzaSyC96IZTPJ9CO-mWWFkR3NVzWjIaUDBMoRE",
   authDomain: "my-web-auth-2026.firebaseapp.com",
-  databaseURL: "databaseURL: "https://my-web-auth-2026-default-rtdb.asia-southeast1.firebasedatabase.app",
+  databaseURL: "https://my-web-auth-2026-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "my-web-auth-2026",
   storageBucket: "my-web-auth-2026.firebasestorage.app",
   messagingSenderId: "358827662331",
@@ -15,48 +15,51 @@ const firebaseConfig = {
   measurementId: "G-HDFHJWF43D"
 };
 
-// Khởi tạo
+// Khởi tạo Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getDatabase(app, "https://my-web-auth-2026-default-rtdb.asia-southeast1.firebasedatabase.app");
+const db = getDatabase(app, firebaseConfig.databaseURL);
 
-// 2. Hàm lưu dữ liệu (Quan trọng: Phải gọi đúng db đã khởi tạo)
+// 2. Hàm xử lý lưu dữ liệu và lịch sử
 async function syncUser(user) {
-    const userRef = ref(db, 'members/' + user.uid);
-    
-    // 1. Tạo định dạng thời gian dễ đọc (Tiếng Việt)
+    // Tạo định dạng ngày tháng: "21:55:01 25/02/2026"
     const now = new Date();
-    const timeString = now.toLocaleTimeString('vi-VN') + " " + now.toLocaleDateString('vi-VN');
-    const timestamp = Date.now(); // Giữ lại số để sắp xếp nếu cần
+    const formattedDate = now.toLocaleTimeString('vi-VN') + " " + now.toLocaleDateString('vi-VN');
+    
+    const userPath = 'members/' + user.uid;
+    const dbRef = ref(db);
 
     try {
-        const snapshot = await get(child(ref(db), `members/${user.uid}`));
+        // Kiểm tra xem thành viên đã tồn tại chưa để giữ ngày tham gia đầu tiên
+        const snapshot = await get(child(dbRef, userPath));
         
         let userData = {
             displayName: user.displayName,
             email: user.email,
             photoURL: user.photoURL,
-            lastLogin: timeString, // Lưu dạng chữ: "21:30:05 25/02/2026"
-            lastLoginTimestamp: timestamp // Vẫn lưu số để sau này lập trình dễ tính toán
+            lastLogin: formattedDate // Ghi đè bằng chữ thay vì số
         };
         
         if (!snapshot.exists()) {
-            userData.createdAt = timeString;
+            userData.createdAt = formattedDate;
+        } else {
+            // Nếu đã có, giữ nguyên ngày tạo cũ
+            userData.createdAt = snapshot.val().createdAt;
         }
-        
-        // 2. Cập nhật thông tin tổng quan của thành viên
-        await set(userRef, userData);
 
-        // 3. LƯU LỊCH SỬ ĐĂNG NHẬP (Mỗi lần login tạo 1 bản ghi mới)
-        const historyRef = ref(db, `members/${user.uid}/loginHistory/${timestamp}`);
-        await set(historyRef, {
-            time: timeString,
-            device: navigator.userAgent // Lưu thêm thông tin trình duyệt/thiết bị nếu muốn
+        // Cập nhật thông tin Profile chính
+        await set(ref(db, userPath), userData);
+
+        // LƯU LỊCH SỬ ĐĂNG NHẬP: Mỗi lần đăng nhập tạo 1 dòng mới trong thư mục 'history'
+        const historyListRef = ref(db, userPath + '/history');
+        const newHistoryRef = push(historyListRef); // Lệnh push giúp tạo ID ngẫu nhiên, tránh ghi đè
+        await set(newHistoryRef, {
+            loginAt: formattedDate
         });
 
-        console.log("Đã cập nhật profile và lưu lịch sử login!");
+        console.log("Hệ thống: Đã lưu dữ liệu mới vào lúc " + formattedDate);
     } catch (error) {
-        console.error("Lỗi:", error);
+        console.error("Lỗi đồng bộ Database:", error);
     }
 }
 
@@ -65,7 +68,6 @@ document.getElementById('btn-google').onclick = async () => {
     const provider = new GoogleAuthProvider();
     try {
         const result = await signInWithPopup(auth, provider);
-        // Sau khi đăng nhập xong, phải gọi hàm lưu dữ liệu
         await syncUser(result.user);
     } catch (error) {
         console.error("Lỗi đăng nhập:", error.message);
@@ -73,7 +75,7 @@ document.getElementById('btn-google').onclick = async () => {
     }
 };
 
-// 4. Theo dõi trạng thái để thay đổi giao diện
+// 4. Theo dõi trạng thái đăng nhập để cập nhật giao diện
 onAuthStateChanged(auth, async (user) => {
     const loginSection = document.getElementById('login-section');
     const userInfo = document.getElementById('user-info');
@@ -88,12 +90,11 @@ onAuthStateChanged(auth, async (user) => {
         document.getElementById('user-email').innerText = user.email;
         document.getElementById('user-photo').src = user.photoURL || 'https://via.placeholder.com/90';
 
-        // Lấy ngày tham gia hiển thị lên màn hình
-        const dbRef = ref(db);
-        get(child(dbRef, `members/${user.uid}`)).then((snapshot) => {
-            if (snapshot.exists() && snapshot.val().createdAt) {
-                const date = new Date(snapshot.val().createdAt);
-                document.getElementById('join-date').innerText = date.toLocaleDateString('vi-VN');
+        // Hiển thị ngày tham gia lấy từ Database
+        const userRef = ref(db, 'members/' + user.uid);
+        get(userRef).then((snapshot) => {
+            if (snapshot.exists()) {
+                document.getElementById('join-date').innerText = snapshot.val().createdAt || "Đang cập nhật...";
             }
         });
     } else {
@@ -103,5 +104,9 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// 5. Đăng xuất
-document.getElementById('btn-logout').onclick = () => signOut(auth);
+// 5. Xử lý Đăng xuất
+document.getElementById('btn-logout').onclick = () => {
+    signOut(auth).then(() => {
+        console.log("Đã đăng xuất");
+    });
+};
