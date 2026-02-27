@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Thành Viên 2026</title>
+    <title>Hệ Thống Thành Viên</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,24 +11,23 @@
         <h1 id="title">Cộng Đồng</h1>
 
         <div id="login-section">
-            <p>Vui lòng đăng nhập để tiếp tục</p>
-            <button id="btn-google" class="btn google">Đăng nhập với Google</button>
-            <button id="btn-facebook" class="btn facebook">Đăng nhập với Facebook</button>
+            <p>Vui lòng đăng nhập bằng Google</p>
+            <button id="btn-google" class="btn google">Tiếp tục với Google</button>
+            <button id="btn-facebook" class="btn facebook">Tiếp tục với Facebook</button>
         </div>
 
         <div id="user-info" class="hidden">
-            <div class="profile-card">
-                <img id="user-photo" src="" alt="Avatar">
-                <h2 id="user-name">---</h2>
-                <p id="user-email">---</p>
-                <p class="meta">Tham gia: <span id="join-date">---</span></p>
-                <button id="btn-logout" class="btn logout">Đăng xuất</button>
-            </div>
+            <img id="user-photo" src="" alt="Avatar">
+            <h2 id="user-name">---</h2>
+            <p id="user-email">---</p>
+            <p>Ngày tham gia: <span id="join-date">---</span></p>
+            
+            <hr>
+            <h4 style="margin-bottom: 10px;">Lịch sử truy cập</h4>
+            <ul id="login-history-list"></ul>
+            <hr>
 
-            <div class="history-section">
-                <h3>Lịch sử hoạt động</h3>
-                <ul id="login-history-list"></ul>
-            </div>
+            <button id="btn-logout" class="btn logout">Đăng xuất</button>
         </div>
     </div>
 
