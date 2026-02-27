@@ -21,45 +21,46 @@ const auth = getAuth(app);
 const db = getDatabase(app, firebaseConfig.databaseURL);
 
 // 2. Hàm xử lý lưu dữ liệu và lịch sử
-async function syncUser(user) {
-    // Tạo định dạng ngày tháng: "21:55:01 25/02/2026"
+    async function syncUser(user, providerName = "Google") {
     const now = new Date();
     const formattedDate = now.toLocaleTimeString('vi-VN') + " " + now.toLocaleDateString('vi-VN');
-    
+    const timestamp = Date.now();
+
     const userPath = 'members/' + user.uid;
     const dbRef = ref(db);
 
     try {
-        // Kiểm tra xem thành viên đã tồn tại chưa để giữ ngày tham gia đầu tiên
+        // 1. Lấy dữ liệu cũ để giữ lại ngày tham gia (createdAt)
         const snapshot = await get(child(dbRef, userPath));
-        
-        let userData = {
+        let createdAt = formattedDate;
+        if (snapshot.exists() && snapshot.val().createdAt) {
+            createdAt = snapshot.val().createdAt;
+        }
+
+        // 2. Cập nhật thông tin tổng quan (Profile)
+        await set(ref(db, userPath), {
             displayName: user.displayName,
             email: user.email,
             photoURL: user.photoURL,
-            lastLogin: formattedDate // Ghi đè bằng chữ thay vì số
-        };
-        
-        if (!snapshot.exists()) {
-            userData.createdAt = formattedDate;
-        } else {
-            // Nếu đã có, giữ nguyên ngày tạo cũ
-            userData.createdAt = snapshot.val().createdAt;
-        }
-
-        // Cập nhật thông tin Profile chính
-        await set(ref(db, userPath), userData);
-
-        // LƯU LỊCH SỬ ĐĂNG NHẬP: Mỗi lần đăng nhập tạo 1 dòng mới trong thư mục 'history'
-        const historyListRef = ref(db, userPath + '/history');
-        const newHistoryRef = push(historyListRef); // Lệnh push giúp tạo ID ngẫu nhiên, tránh ghi đè
-        await set(newHistoryRef, {
-            loginAt: formattedDate
+            lastLogin: formattedDate,
+            createdAt: createdAt,
+            provider: providerName // Để biết họ hay dùng Google hay Facebook
         });
 
-        console.log("Hệ thống: Đã lưu dữ liệu mới vào lúc " + formattedDate);
+        // 3. LƯU LỊCH SỬ (Dùng push để mỗi lần login là một dòng mới)
+        // Đường dẫn: members/UID/login_history/ID_TỰ_ĐỘNG
+        const historyRef = ref(db, userPath + '/login_history');
+        const newLogRef = push(historyRef); // Tạo ID ngẫu nhiên không trùng lặp
+        
+        await set(newLogRef, {
+            time: formattedDate,
+            timestamp: timestamp,
+            type: providerName
+        });
+
+        console.log("✅ Đã ghi danh vào lịch sử: " + formattedDate);
     } catch (error) {
-        console.error("Lỗi đồng bộ Database:", error);
+        console.error("❌ Lỗi lưu lịch sử:", error);
     }
 }
 
@@ -110,3 +111,4 @@ document.getElementById('btn-logout').onclick = () => {
         console.log("Đã đăng xuất");
     });
 };
+
