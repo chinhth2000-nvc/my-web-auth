@@ -67,9 +67,9 @@ const db = getDatabase(app, firebaseConfig.databaseURL);
 // 3. Xử lý Đăng nhập Google
 document.getElementById('btn-google').onclick = async () => {
     const provider = new GoogleAuthProvider();
-    try {
+    try {        
         const result = await signInWithPopup(auth, provider);
-        await syncUser(result.user);
+        await syncUser(result.user, "Google"); // Truyền chữ Google vào        
     } catch (error) {
         console.error("Lỗi đăng nhập:", error.message);
         alert("Lỗi: " + error.message);
@@ -111,4 +111,5 @@ document.getElementById('btn-logout').onclick = () => {
         console.log("Đã đăng xuất");
     });
 };
+
 
