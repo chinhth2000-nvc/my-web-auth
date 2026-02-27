@@ -1,113 +1,17 @@
-/* --- BIẾN TOÀN CỤC --- */
-:root {
-    --primary: #007bff;
-    --primary-hover: #0056b3;
-    --bg-body: #f0f2f5;
-    --white: #ffffff;
-    --text-main: #1c1e21;
-    --text-sub: #606770;
-}
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
+.container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+.hidden { display: none; }
+.btn { width: 100%; padding: 12px; margin: 10px 0; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+.google { background: #db4437; color: white; }
+.facebook { background: #1877f2; color: white; }
+.logout { background: #606770; color: white; margin-top: 20px; }
+.btn:hover { opacity: 0.8; }
 
-/* --- THIẾT LẬP CHUNG (RESPONSIVE) --- */
-* { box-sizing: border-box; margin: 0; padding: 0; }
+.profile-card img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid #1877f2; }
+.meta { font-size: 0.85em; color: #777; }
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--bg-body);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: 15px;
-}
-
-.auth-container {
-    background: var(--white);
-    width: 100%;
-    max-width: 400px;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    text-align: center;
-}
-
-.hidden { display: none !important; }
-
-/* --- TIÊU ĐỀ --- */
-header h2 { color: var(--text-main); margin-bottom: 8px; font-size: 24px; }
-header p { color: var(--text-sub); margin-bottom: 25px; font-size: 14px; }
-
-/* --- INPUT & BUTTON --- */
-input {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 12px;
-    border: 1px solid #dddfe2;
-    border-radius: 6px;
-    font-size: 15px;
-}
-
-input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 2px #e7f3ff; }
-
-.btn-primary {
-    width: 100%;
-    background-color: var(--primary);
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 6px;
-    font-size: 17px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.btn-primary:hover { background-color: var(--primary-hover); }
-
-/* --- ĐĂNG NHẬP MẠNG XÃ HỘI --- */
-.divider {
-    margin: 20px 0;
-    border-bottom: 1px solid #dadde1;
-    line-height: 0.1em;
-}
-.divider span { background: #fff; padding: 0 10px; color: #8d949e; font-size: 13px; }
-
-.btn-social {
-    width: 100%;
-    background: white;
-    border: 1px solid #dddfe2;
-    padding: 10px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 14px;
-    color: #4b4f56;
-}
-
-.btn-social img { width: 18px; height: 18px; }
-.btn-social:hover { background-color: #f5f6f7; }
-
-/* --- HỒ SƠ THÀNH VIÊN --- */
-.profile-card { animation: fadeIn 0.5s; }
-#user-photo { width: 90px; height: 90px; border-radius: 50%; border: 4px solid #e7f3ff; margin-bottom: 15px; }
-.btn-logout { 
-    margin-top: 20px; 
-    background: none; 
-    border: 1px solid #fa3e3e; 
-    color: #fa3e3e; 
-    padding: 8px 16px; 
-    border-radius: 5px; 
-    cursor: pointer;
-}
-
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-/* --- MOBILE --- */
-@media (max-width: 480px) {
-    .auth-container { padding: 20px; box-shadow: none; border: 1px solid #ddd; }
-}
+.history-section { margin-top: 25px; text-align: left; border-top: 1px solid #eee; padding-top: 15px; }
+.history-section h3 { font-size: 1em; color: #333; margin-bottom: 10px; }
+#login-history-list { list-style: none; padding: 0; max-height: 200px; overflow-y: auto; font-size: 0.85em; }
+#login-history-list li { padding: 8px 0; border-bottom: 1px solid #fafafa; color: #555; }
+#login-history-list li:before { content: "🕒 "; }
