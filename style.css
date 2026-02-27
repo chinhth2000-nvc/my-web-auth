@@ -1,17 +1,13 @@
-body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
-.container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+body { font-family: sans-serif; background: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+.container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); text-align: center; width: 350px; }
 .hidden { display: none; }
-.btn { width: 100%; padding: 12px; margin: 10px 0; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-.google { background: #db4437; color: white; }
-.facebook { background: #1877f2; color: white; }
-.logout { background: #606770; color: white; margin-top: 20px; }
-.btn:hover { opacity: 0.8; }
+.btn { width: 100%; padding: 10px; margin: 10px 0; border: none; border-radius: 5px; cursor: pointer; color: white; font-weight: bold; }
+.google { background: #db4437; }
+.facebook { background: #1877f2; }
+.logout { background: #555; }
+#user-photo { width: 90px; height: 90px; border-radius: 50%; margin-bottom: 10px; border: 2px solid #ddd; }
+hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
 
-.profile-card img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid #1877f2; }
-.meta { font-size: 0.85em; color: #777; }
-
-.history-section { margin-top: 25px; text-align: left; border-top: 1px solid #eee; padding-top: 15px; }
-.history-section h3 { font-size: 1em; color: #333; margin-bottom: 10px; }
-#login-history-list { list-style: none; padding: 0; max-height: 200px; overflow-y: auto; font-size: 0.85em; }
-#login-history-list li { padding: 8px 0; border-bottom: 1px solid #fafafa; color: #555; }
-#login-history-list li:before { content: "🕒 "; }
+/* Style cho danh sách lịch sử */
+#login-history-list { list-style: none; padding: 0; text-align: left; max-height: 120px; overflow-y: auto; font-size: 0.8em; color: #666; }
+#login-history-list li { padding: 4px 0; border-bottom: 1px solid #f9f9f9; }
