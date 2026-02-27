@@ -78,30 +78,50 @@ document.getElementById('btn-google').onclick = async () => {
 
 // 4. Theo dõi trạng thái đăng nhập để cập nhật giao diện
 onAuthStateChanged(auth, async (user) => {
-    const loginSection = document.getElementById('login-section');
-    const userInfo = document.getElementById('user-info');
-    const title = document.getElementById('title');
-
+    const loginSec = document.getElementById('login-section');
+    const userSec = document.getElementById('user-info');
+    
     if (user) {
-        loginSection.classList.add('hidden');
-        userInfo.classList.remove('hidden');
-        title.innerText = "Hồ Sơ Thành Viên";
-
-        document.getElementById('user-name').innerText = user.displayName || "Thành viên";
+        loginSec.classList.add('hidden');
+        userSec.classList.remove('hidden');
+        
+        // Hiển thị info cơ bản
+        document.getElementById('user-name').innerText = user.displayName;
         document.getElementById('user-email').innerText = user.email;
-        document.getElementById('user-photo').src = user.photoURL || 'https://via.placeholder.com/90';
+        document.getElementById('user-photo').src = user.photoURL;
 
-        // Hiển thị ngày tham gia lấy từ Database
-        const userRef = ref(db, 'members/' + user.uid);
+        // LẤY DỮ LIỆU TỪ FIREBASE ĐỂ HIỂN THỊ LỊCH SỬ
+        const userPath = 'members/' + user.uid;
+        const userRef = ref(db, userPath);
+
         get(userRef).then((snapshot) => {
             if (snapshot.exists()) {
-                document.getElementById('join-date').innerText = snapshot.val().createdAt || "Đang cập nhật...";
+                const data = snapshot.val();
+                
+                // 1. Hiển thị ngày tham gia
+                document.getElementById('join-date').innerText = data.createdAt;
+
+                // 2. Hiển thị danh sách lịch sử (MỚI)
+                const historyList = document.getElementById('login-history-list');
+                historyList.innerHTML = ""; // Xóa danh sách cũ đi để hiện danh sách mới
+
+                if (data.login_history) {
+                    // Chuyển object lịch sử thành mảng và đảo ngược để cái mới nhất lên đầu
+                    const logs = Object.values(data.login_history).reverse();
+                    
+                    logs.forEach(log => {
+                        const li = document.createElement('li');
+                        li.style.borderBottom = "1px dotted #ccc";
+                        li.style.padding = "5px 0";
+                        li.innerText = `➤ ${log.time} (${log.type || 'Google'})`;
+                        historyList.appendChild(li);
+                    });
+                }
             }
         });
     } else {
-        loginSection.classList.remove('hidden');
-        userInfo.classList.add('hidden');
-        title.innerText = "Cộng Đồng";
+        loginSec.classList.remove('hidden');
+        userSec.classList.add('hidden');
     }
 });
 
@@ -111,5 +131,6 @@ document.getElementById('btn-logout').onclick = () => {
         console.log("Đã đăng xuất");
     });
 };
+
 
 
