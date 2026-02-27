@@ -3,46 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Thành Viên</title>
+    <title>Hệ Thống Thành Viên 2026</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="container">
+        <h1 id="title">Cộng Đồng</h1>
 
-    <div class="auth-container">
-        <header>
-            <h2 id="title">Cộng Đồng</h2>
-            <p id="desc">Chào mừng bạn quay trở lại</p>
-        </header>
-        
         <div id="login-section">
-            <div class="social-login">
-                <button id="btn-google" class="btn-social">
-                    <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg" alt="Google">
-                    Google
-                </button>
-                <button id="btn-facebook" class="btn-social">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/2023_Facebook_icon.svg" alt="FB">
-                    Facebook
-                </button>
-            </div>
-            <div class="divider"><span>HOẶC</span></div>
-            <form onsubmit="return false;">
-                <input type="email" placeholder="Email" id="login-email">
-                <input type="password" placeholder="Mật khẩu" id="login-pass">
-                <button class="btn-primary">Đăng ký tài khoản</button>
-            </form>
+            <p>Vui lòng đăng nhập để tiếp tục</p>
+            <button id="btn-google" class="btn google">Đăng nhập với Google</button>
+            <button id="btn-facebook" class="btn facebook">Đăng nhập với Facebook</button>
         </div>
 
         <div id="user-info" class="hidden">
             <div class="profile-card">
                 <img id="user-photo" src="" alt="Avatar">
-                <h3 id="user-name">...</h3>
-                <p id="user-email"></p>
-                <p class="join-info">Thành viên từ: <span id="join-date">...</span></p>
-                <button id="btn-logout" class="btn-logout">Đăng xuất</button>
-                <h3>Lịch sử đăng nhập:</h3>
-                <ul id="login-history-list" style="list-style: none; padding: 0; font-size: 0.9em; color: #555;">
-                </ul>
+                <h2 id="user-name">---</h2>
+                <p id="user-email">---</p>
+                <p class="meta">Tham gia: <span id="join-date">---</span></p>
+                <button id="btn-logout" class="btn logout">Đăng xuất</button>
+            </div>
+
+            <div class="history-section">
+                <h3>Lịch sử hoạt động</h3>
+                <ul id="login-history-list"></ul>
             </div>
         </div>
     </div>
