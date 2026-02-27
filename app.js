@@ -2,7 +2,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getAuth, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getDatabase, ref, set, get, child, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// --- CẤU HÌNH ---
 const firebaseConfig = {
     apiKey: "AIzaSyC96IZTPJ9CO-mWWFkR3NVzWjIaUDBMoRE",
     authDomain: "my-web-auth-2026.firebaseapp.com",
@@ -18,107 +17,87 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// --- HÀM TRỢ GIÚP ---
+// Hàm lấy thời gian chuẩn Việt Nam
+const getVNTime = () => new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
 
-// Hàm định dạng thời gian Việt Nam
-const getVNDate = () => {
-    return new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
-};
-
-// Hàm đồng bộ dữ liệu người dùng
+// Hàm đồng bộ dữ liệu và ghi lịch sử
 async function syncUser(user, providerName) {
-    const userPath = `members/${user.uid}`;
-    const timeNow = getVNDate();
+    const timeNow = getVNTime();
+    const userRef = ref(db, `members/${user.uid}`);
 
     try {
-        const snapshot = await get(child(ref(db), userPath));
+        const snapshot = await get(child(ref(db), `members/${user.uid}/profile`));
         let createdAt = timeNow;
-
         if (snapshot.exists()) {
             createdAt = snapshot.val().createdAt || timeNow;
         }
 
-        // 1. Cập nhật Profile
-        await set(ref(db, userPath + '/profile'), {
-            name: user.displayName,
+        // 1. Lưu Profile
+        await set(ref(db, `members/${user.uid}/profile`), {
+            displayName: user.displayName,
             email: user.email,
-            photo: user.photoURL,
-            lastLogin: timeNow,
+            photoURL: user.photoURL,
             createdAt: createdAt,
+            lastLogin: timeNow,
             provider: providerName
         });
 
-        // 2. Thêm vào Lịch sử (Push tạo ID mới)
-        const historyRef = ref(db, userPath + '/history');
+        // 2. Lưu Lịch sử (Push ID mới)
+        const historyRef = ref(db, `members/${user.uid}/history`);
         await push(historyRef, {
             time: timeNow,
             type: providerName
         });
 
-        console.log("✅ Dữ liệu đã được đồng bộ!");
-    } catch (error) {
-        console.error("❌ Lỗi Sync:", error);
-    }
+        console.log("✅ Đồng bộ thành công!");
+    } catch (e) { console.error(e); }
 }
 
-// --- XỬ LÝ SỰ KIỆN ---
-
-// Đăng nhập Google
+// Xử lý sự kiện nút bấm
 document.getElementById('btn-google').onclick = async () => {
     try {
-        const result = await signInWithPopup(auth, new GoogleAuthProvider());
-        await syncUser(result.user, "Google");
-    } catch (error) {
-        alert("Lỗi Google Auth: " + error.message);
-    }
+        const res = await signInWithPopup(auth, new GoogleAuthProvider());
+        await syncUser(res.user, "Google");
+    } catch (e) { alert(e.message); }
 };
 
-// Đăng nhập Facebook (Để sẵn khung cho bạn làm tiếp)
 document.getElementById('btn-facebook').onclick = async () => {
     try {
-        const result = await signInWithPopup(auth, new FacebookAuthProvider());
-        await syncUser(result.user, "Facebook");
-    } catch (error) {
-        alert("Lỗi Facebook Auth: " + error.message);
-    }
+        const res = await signInWithPopup(auth, new FacebookAuthProvider());
+        await syncUser(res.user, "Facebook");
+    } catch (e) { alert("Facebook yêu cầu cấu hình App ID. " + e.message); }
 };
 
-// Đăng xuất
 document.getElementById('btn-logout').onclick = () => signOut(auth);
 
-// --- THEO DÕI TRẠNG THÁI ---
+// Theo dõi trạng thái đăng nhập
 onAuthStateChanged(auth, (user) => {
     const loginSec = document.getElementById('login-section');
     const userSec = document.getElementById('user-info');
+    const title = document.getElementById('title');
 
     if (user) {
         loginSec.classList.add('hidden');
         userSec.classList.remove('hidden');
+        title.innerText = "Hồ Sơ Thành Viên";
 
-        // Hiển thị UI ngay lập tức từ đối tượng user của Firebase
         document.getElementById('user-name').innerText = user.displayName;
         document.getElementById('user-email').innerText = user.email;
         document.getElementById('user-photo').src = user.photoURL;
 
-        // Lấy dữ liệu từ Database để hiển thị Ngày tham gia và Lịch sử
-        const userRef = ref(db, `members/${user.uid}`);
-        get(userRef).then((snapshot) => {
+        // Lấy dữ liệu từ Realtime Database để hiện Ngày tham gia & Lịch sử
+        get(ref(db, `members/${user.uid}`)).then((snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
-                if (data.profile) {
-                    document.getElementById('join-date').innerText = data.profile.createdAt;
-                }
+                if (data.profile) document.getElementById('join-date').innerText = data.profile.createdAt;
                 
-                // Hiển thị danh sách lịch sử
-                const historyList = document.getElementById('login-history-list');
-                historyList.innerHTML = "";
-                
+                const list = document.getElementById('login-history-list');
+                list.innerHTML = "";
                 if (data.history) {
-                    // Chuyển lịch sử thành mảng, đảo ngược để cái mới nhất lên đầu
                     Object.values(data.history).reverse().forEach(log => {
                         const li = document.createElement('li');
-                        li.innerText = `${log.time} [${log.type}]`;
-                        historyList.appendChild(li);
+                        li.innerText = `🕒 ${log.time} [${log.type}]`;
+                        list.appendChild(li);
                     });
                 }
             }
@@ -126,5 +105,6 @@ onAuthStateChanged(auth, (user) => {
     } else {
         loginSec.classList.remove('hidden');
         userSec.classList.add('hidden');
+        title.innerText = "Cộng Đồng";
     }
 });
